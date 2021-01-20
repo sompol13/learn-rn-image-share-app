@@ -1,9 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { Image, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { Image, Platform, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import logo from './assets/logo.png'
 import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
+import uploadToAnonymousFilesAsync from 'anonymous-files';
 
 export default function App() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -14,16 +15,24 @@ export default function App() {
     if (permissionResult.granted === false) {
       alert("Permission to access camera roll is required!")
     }
+    
     let pickerResult = await ImagePicker.launchImageLibraryAsync();
+    if (pickerResult.cancelled === true) {
+      return;
+    }
 
-    if (pickerResult.cancelled === true) return;
-
-    setSelectedImage({ localUri: pickerResult.uri })
+    if (Platform.OS === 'web') {
+      let remoteUri = await uploadToAnonymousFilesAsync(pickerResult.uri);
+      console.log(remoteUri);
+      setSelectedImage({ localUri: pickerResult.uri, remoteUri: remoteUri })
+    } else {
+      setSelectedImage({ localUri: pickerResult.uri, remoteUri: null });
+    }
   }
 
   let openShareDialogAsync = async () => {
     if (!await Sharing.isAvailableAsync()) {
-      alert(`Uh oh, sharing isn't available on your platform`);
+      alert(`The image is available for sharing at: ${selectedImage.remoteUri}`);
       return;
     }
 
