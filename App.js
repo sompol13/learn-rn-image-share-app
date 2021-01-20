@@ -5,6 +5,7 @@ import logo from './assets/logo.png'
 import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
 import uploadToAnonymousFilesAsync from 'anonymous-files';
+import ReuseableButton from './components/ReuseableButton'
 
 export default function App() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -39,6 +40,10 @@ export default function App() {
     await Sharing.shareAsync(selectedImage.localUri);
   }
 
+  const handleClickUnpickButton = () => {
+    setSelectedImage(null);
+  }
+
   if (selectedImage) {
     return (
       <View style={styles.container}>
@@ -46,9 +51,8 @@ export default function App() {
           source={{ uri: selectedImage.localUri }}
           style={styles.thumbnail}
         />
-        <TouchableOpacity onPress={openShareDialogAsync} style={styles.button}>
-          <Text style={styles.buttonText}>Share this photo</Text>
-        </TouchableOpacity>
+        <ReuseableButton onPress={openShareDialogAsync} label="Share this photo"/>
+        <ReuseableButton onPress={handleClickUnpickButton} label="Unpick this photo" style={{ backgroundColor: '#cd5d7d' }} />
       </View>
     )
   }
@@ -61,12 +65,7 @@ export default function App() {
         To share a photo from your phone with a friend, just press the button below!
       </Text>
 
-      <TouchableOpacity
-        onPress={openImagePickerAsync}
-        style={styles.button}
-      >
-        <Text style={styles.buttonText}>Pick a photo</Text>
-      </TouchableOpacity>
+      <ReuseableButton onPress={openImagePickerAsync} label="Pick a photo" />
     </View>
   );
 }
@@ -88,15 +87,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginHorizontal: 15,
     marginBottom: 10,
-  },
-  button: {
-    backgroundColor: 'blue',
-    padding: 20,
-    borderRadius: 5,
-  },
-  buttonText: {
-    fontSize: 20,
-    color: '#fff'
   },
   thumbnail: {
     width: 300,
